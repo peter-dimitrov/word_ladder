@@ -30,22 +30,32 @@ def word_ladder(start_word, end_word, dictionary_file='words5.dict'):
     '''
     from collections import deque
     import copy
+    if start_word == end_word:
+        return [start_word]
+    with open(dictionary_file) as dictionary_file:
+        dictionary = dictionary_file.readlines()
+    new_dic = []
+    for nword in dictionary:
+        new_dic.append(nword.strip('\n'))
     s = []
     s.append(start_word)
     q = deque()
-    q.append(s)
+    q.appendleft(s)
     while len(q) != 0:
-        q.pop()
-        for word in dictionary_file:
-            if _adjacent(word,s[-1]):
+        top = q.pop()
+        for word in new_dic:
+            if _adjacent(word,top[-1]):    
                 if word == end_word:
-                    s.append(word)
-                    return s
-                sc = copy.deepcopy(s)
+                    top.append(word)
+                    for i in range(1,len(top)-2):
+                        if _adjacent(top[i-1],top[i+1]):
+                            top.pop(i)
+                    return top
+                sc = copy.deepcopy(top)
                 sc.append(word)
-                q.append(sc)
-                dictionary_file.pop(word)
-
+                q.appendleft(sc)
+                new_dic.remove(word)
+    return None
 
 def verify_word_ladder(ladder):
     '''
@@ -54,6 +64,8 @@ def verify_word_ladder(ladder):
     '''
     if len(ladder) == 0:
         return False
+    if len(ladder) == 1:
+        return True
     for index in range(len(ladder)-1):
             if not _adjacent(ladder[index],ladder[index+1]):
                 return False
